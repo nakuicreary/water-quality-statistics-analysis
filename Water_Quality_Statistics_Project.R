@@ -8,6 +8,8 @@ library(dplyr)
 library(car)           # For Levene’s Test
 library(ggpubr)        # For ggboxplot
 library(reshape2)
+library(forecast)
+library(tseries)
 
 # 📥 Load dataset
 df <- read.csv("/Users/kai/Downloads/canada_water_pollution.csv")
@@ -68,4 +70,33 @@ ggplot(corr_melt, aes(x=Var1, y=Var2, fill=value)) +
   geom_text(aes(label=round(value, 2))) +
   scale_fill_gradient2() +
   labs(title = "Correlation Matrix of Indicators")
+
+# 📅 Prepare Time Series Data for Ontario
+df_ontario <- df %>%
+  filter(Province == "Ontario") %>%
+  group_by(Month_Year = floor_date(Date, "month")) %>%
+  summarise(Turbidity = mean(Turbidity_NTU, na.rm = TRUE)) %>%
+  arrange(Month_Year)
+
+# 📊 Convert to Time Series Object
+ts_ontario <- ts(df_ontario$Turbidity, 
+                 start = c(year(min(df_ontario$Month_Year)), 
+                         month(min(df_ontario$Month_Year))), frequency = 12)
+
+# 🔎 Seasonal Decomposition (Additive)
+decomp <- decompose(ts_ontario, type = "additive")
+plot(decomp)
+
+# 🔮 ARIMA(2,1,2) Model Forecasting
+model <- Arima(ts_ontario, order = c(2, 1, 2))
+summary(model)
+
+# Forecast next 12 months
+forecast_result <- forecast(model, h = 12)
+
+# 📈 Plot Forecast
+autoplot(forecast_result) +
+  labs(title = "12-Month Forecast of Turbidity in Ontario",
+       x = "Year",
+       y = "Turbidity (NTU)")
 
