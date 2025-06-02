@@ -6,7 +6,7 @@ variations in water quality across multiple provinces.
 
 📈 Key Responsibilities & Outcomes:
 
-Cleaned and preprocessed over 10,000 records using tidyverse, converting time 
+Cleaned and preprocessed 3,000 records using tidyverse, converting time 
 stamps, handling missing data, and creating a seasonal variable for comparison.
 
 Performed exploratory data analysis (EDA) and visualized trends using line plots 
